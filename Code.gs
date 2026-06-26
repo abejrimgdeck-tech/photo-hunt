@@ -2,7 +2,7 @@ const SPREADSHEET_ID = "1jcSk2sXincBCnUEGWSzMfqWlLP16HDTKhA8ohlj8Ht0";
 
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('PHOTO HUNT GUESSING GAME')
+    .setTitle('PHOTO HUNT GUESSING TEST')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
@@ -36,21 +36,21 @@ function getLeaderboard() {
     if (!sheet) return [];
     
     var data = sheet.getDataRange().getValues();
-    // Check if sheet has header + data
     if (!data || data.length < 2) return [];
     
     var results = [];
-    // Start at row 1 (skipping header at row 0)
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
       if (row && row.length >= 5) {
-        // Parse score safely: get the numeric part before "/"
         var rawScore = (row[4] || "0").toString();
-        var cleanScore = parseInt(rawScore.split('/')[0]);
+        var cleanScore = parseInt(rawScore.split('/')[0], 10);
+        var rowDate = new Date(row[0]);
         
-        if (!isNaN(cleanScore)) {
+        // Ensure date and score are valid before adding
+        if (!isNaN(cleanScore) && rowDate instanceof Date && !isNaN(rowDate)) {
           results.push({
-            date: new Date(row[0]),
+            date: rowDate.getTime(), // Use milliseconds for flawless sorting
+            displayDate: Utilities.formatDate(rowDate, Session.getScriptTimeZone(), "MMM dd"), // Shows as "Jun 26"
             name: row[2] || "Unknown",
             score: cleanScore
           });
@@ -58,12 +58,12 @@ function getLeaderboard() {
       }
     }
 
-    // Sort by Score (high to low), then Date (newest first)
+    // Sort by Score (highest first), then Date (newest first)
     results.sort(function(a, b) { 
       return b.score - a.score || b.date - a.date; 
     });
     
-    // Return top 100 entries
+    // Cap at 100 entries
     return results.slice(0, 100);
   } catch (e) {
     return []; 
@@ -77,7 +77,6 @@ function saveResult(userData) {
     
     var timestamp = new Date();
     sheet.insertRowBefore(2);
-    // Timestamp, UserID, Name, Gmail, Score, Time, Level
     sheet.getRange(2, 1, 1, 7).setValues([[
       timestamp, 
       userData.userId,

@@ -6,7 +6,6 @@
   <style>
     :root { --bg-color: #2F4F4F; --card-bg: #355E3B; --accent: #50C878; --text-light: #F0FFF0; --text-dark: #1A2421; --danger: #FF6B6B; }
     
-    /* ANTI-CHEAT: Prevent text selection */
     body {
       font-family: 'Lexend', sans-serif; background-color: var(--bg-color); color: var(--text-light);
       margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh;
@@ -20,53 +19,47 @@
     button:hover { background-color: #3CB371; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
     
-    .choice-btn { display: block; width: 100%; margin: 10px 0; background-color: #4A7055; color: white; }
+    #choices-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+    .choice-btn { background-color: #4A7055; color: white; margin: 0; padding: 12px 10px; font-size: 0.9em; height: 100%; display: flex; justify-content: center; align-items: center; }
     .choice-btn:hover:not(:disabled) { background-color: var(--accent); color: var(--text-dark); }
     .choice-correct { background-color: #50C878 !important; color: #1A2421 !important; }
     .choice-wrong { background-color: #FF6B6B !important; color: white !important; }
     .hidden { display: none !important; }
 
-    #quiz-image { max-width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; background-color: #1A2421; transition: transform 0.3s ease; }
+    #quiz-image { max-width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; margin-bottom: 5px; background-color: #1A2421; transition: transform 0.3s ease; }
     #quiz-image:hover { transform: scale(1.05); } 
     
     .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9em; border-bottom: 1px solid #4A7055; padding-bottom: 10px; font-weight: 600; }
     .time-warning { color: var(--danger) !important; font-size: 1.1em; }
 
-    /* Correct Answer Toast Notification */
     #correct-toast {
-      position: absolute; top: 15px; left: 15px; background: rgba(26, 36, 33, 0.9);
+      position: absolute; top: 15px; right: 15px; background: rgba(26, 36, 33, 0.9);
       color: var(--accent); padding: 8px 12px; border-radius: 6px; font-weight: 600;
       font-size: 0.9em; z-index: 100; border: 1px solid var(--accent);
       box-shadow: 0 4px 8px rgba(0,0,0,0.4); pointer-events: none;
     }
 
-    /* UI Layout Adjustments */
-    #mini-player { position: fixed; bottom: 20px; left: 20px; background: var(--card-bg); padding: 12px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 1000; text-align: left; }
+    #mini-player { position: fixed; bottom: 20px; left: 20px; background: var(--card-bg); padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 1000; text-align: left; font-size: 0.85em; }
     #mini-player-controls { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
-    #mini-player button { padding: 5px 10px; margin: 0; background-color: #4A7055; color: white; }
-    #track-name { font-size: 0.8em; color: var(--accent); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    input[type=range] { width: 80px; cursor: pointer; margin: 0; }
+    #mini-player button { padding: 4px 8px; margin: 0; background-color: #4A7055; color: white; font-size: 0.9em; }
+    #track-name { font-size: 0.9em; color: var(--accent); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    input[type=range] { width: 70px; cursor: pointer; margin: 0; }
 
-    #fun-mode-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: 0.85em; background: #2F4F4F; padding: 10px 20px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000; }
+    #fun-mode-container { position: fixed; bottom: 20px; right: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.85em; background: #2F4F4F; padding: 8px 15px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000; }
     #fun-mode-container input { margin-right: 8px; cursor: pointer; transform: scale(1.2); }
 
     #cat-meme { position: fixed; bottom: 80px; right: 20px; width: 300px; border-radius: 8px; z-index: 1000; pointer-events: none; box-shadow: 0 8px 16px rgba(0,0,0,0.6); }
     
-    /* ANTI-CHEAT BLUR SCREEN */
     #cheat-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--danger); font-size: 1.5em; text-align: center; }
 
-    #leaderboard-modal {
-      max-height: 80vh;
-      overflow-y: auto;
-      scrollbar-width: thin; /* Makes scrollbar slim on Firefox */
-    }
+    #leaderboard-modal { max-height: 80vh; overflow-y: auto; scrollbar-width: thin; }
   </style>
 </head>
 <body>
 
   <div id="cheat-overlay" class="hidden">
-    <h1>⚠️ WARNING</h1>
-    <p>You have left the test window.<br>Return to the game to continue.</p>
+    <h1>⚠️ TEST IDLE</h1>
+    <p>You have left the test window.<br>Return to the test to continue.</p>
   </div>
 
   <div id="mini-player" class="hidden">
@@ -82,11 +75,11 @@
 
   <div id="fun-mode-container" class="hidden">
     <input type="checkbox" id="fun-mode-toggle"> 
-    <label for="fun-mode-toggle"><strong>Fun Mode GIFs</strong></label>
+    <label for="fun-mode-toggle"><strong>Game Mode</strong></label>
   </div>
 
   <div id="login-step-1" class="container">
-    <h1>📸 PHOTO HUNT GUESSING GAME</h1>
+    <h1>📸 PHOTO HUNT GUESSING TEST</h1>
     <p>Portal Access: Please enter your credentials.</p>
     <input type="text" id="userid" placeholder="🆔 User ID">
     <input type="password" id="passcode" placeholder="🗝️ Passcode">
@@ -96,7 +89,7 @@
   </div>
 
   <div id="login-step-2" class="container hidden">
-    <h1>👤 TRAINEE PROFILE</h1>
+    <h1>👤 CANDIDATE PROFILE</h1>
     <p>ID Verified! Please enter your details for the scoreboard.</p>
     <input type="text" id="userName" placeholder="Your Name">
     <input type="email" id="userEmail" placeholder="Your Gmail Address">
@@ -118,7 +111,7 @@
   </div>
 
   <div id="review-screen" class="container hidden">
-    <h1 id="review-title">Hunt Complete!</h1>
+    <h1 id="review-title">Test Complete!</h1>
     <h2>Final Score: <span id="final-score"></span>/50 (<span id="final-percentage"></span>%)</h2>
     <p id="final-time" class="hidden"></p>
     <div id="review-list" style="text-align: left; max-height: 250px; overflow-y: auto; margin-top: 20px; padding-right: 10px;"></div>
@@ -130,7 +123,7 @@
   </div>
 
   <div id="leaderboard-modal" class="container hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
-    <h1>🏆 Top 10 Hunters</h1>
+    <h1>🏆 Top 100 Ranks</h1>
     <div id="leaderboard-list"></div>
     <button onclick="document.getElementById('leaderboard-modal').classList.add('hidden')" style="margin-top: 20px;">Close</button>
   </div>
@@ -141,8 +134,10 @@
     // ==========================================
     // ANTI-CHEAT MEASURES
     // ==========================================
-    document.addEventListener('contextmenu', function(e) { e.preventDefault(); }); // Block right click
-    document.addEventListener('copy', function(e) { e.preventDefault(); }); // Block copy
+    // UNCOMMENT THE LINE BELOW TO ENABLE RIGHT-CLICK BLOCK FOR PRODUCTION
+    // document.addEventListener('contextmenu', function(e) { e.preventDefault(); }); 
+    
+    document.addEventListener('copy', function(e) { e.preventDefault(); }); 
     
     window.addEventListener('blur', function() {
       if(!document.getElementById('quiz-screen').classList.contains('hidden')) {
@@ -151,7 +146,6 @@
     });
     window.addEventListener('focus', function() { document.getElementById('cheat-overlay').classList.add('hidden'); });
 
-    // Enter Key Bindings for Menus
     document.getElementById("login-step-1").addEventListener("keypress", function(e) {
       if (e.key === "Enter") attemptAuth();
     });
@@ -169,11 +163,11 @@
 
     var trackListAll = [
       { url: ghBase + "Background%20Music%20and%20SFX/dogs-and-puppies.mp3", name: "Dogs and Puppies" },
-      { url: ghBase + "Background%20Music%20and%20SFX/es-the-cool-fool-5-martin-landh.mp3", name: "The Cool Fool" },
-      { url: ghBase + "Background%20Music%20and%20SFX/for-my-people-by-matt-large-1990s-hip-hop-music.mp3", name: "For My People" }
+      { url: ghBase + "Background%20Music%20and%20SFX/es-the-cool-fool-5-martin-landh.mp3", name: "The Cool Fool" }
     ];
     
     var trackListLvl2 = trackListAll.concat([
+      { url: ghBase + "Background%20Music%20and%20SFX/for-my-people-by-matt-large-1990s-hip-hop-music.mp3", name: "For My People" },
       { url: ghBase + "Background%20Music%20and%20SFX/c418-haggstrom-minecraft-volume-alpha.mp3", name: "Haggstrom (C418)" },
       { url: ghBase + "Background%20Music%20and%20SFX/c418-sweden-minecraft-volume-alpha.mp3", name: "Sweden (C418)" },
       { url: ghBase + "Background%20Music%20and%20SFX/c418-wet-hands-minecraft-volume-alpha.mp3", name: "Wet Hands (C418)" },
@@ -202,49 +196,292 @@
     var loseGifs = ["l1.gif", "l2.gif", "l3.gif", "l4.gif", "l5.gif", "l6.gif", "l7.gif", "l8.gif", "l9.gif", "l10.gif", "l11.gif"];
 
     // ==========================================
-    // QUESTION MAPPER (lh3 conversion)
-    // Categories: 1 (Easy), 2 (Medium), 3 (Hard)
+    // QUESTION MAPPER (115+ Items, Pre-Shuffled)
     // ==========================================
-    var driveBase = "https://lh3.googleusercontent.com/d/";
-    
-    // Paste all of your questions in here!
-    var questionPoolRaw = [
-          // Access Panel
-          { tier: 2, id: "https://github.com/abejrimgdeck-tech/photo-hunt/blob/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/access%20panel%201.jpg", q: "What part of the house or feature is this?", ans: "Access Panel", choices: ["Access Panel", "Service Door", "Utility Hatch", "Inspection Panel"] },
-          { tier: 2, id: "https://github.com/abejrimgdeck-tech/photo-hunt/blob/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/access%20panel%202.jpg", q: "Identify the feature shown in the photo:", ans: "Access Panel", choices: ["Access Panel", "Service Door", "Utility Hatch", "Inspection Panel"] }
-    ];
-
-    // Build unique, fully formatted question pool
-    var questionPool = [];
-    var usedIds = {};
-    for(var p=0; p<questionPoolRaw.length; p++) {
-      if(!usedIds[questionPoolRaw[p].id]) {
-        usedIds[questionPoolRaw[p].id] = true;
-        questionPool.push({
-          tier: questionPoolRaw[p].tier,
-          imgUrl: driveBase + questionPoolRaw[p].id,
-          q: questionPoolRaw[p].q,
-          ans: questionPoolRaw[p].ans,
-          choices: questionPoolRaw[p].choices
-        });
+    function shuffleArray(arr) {
+      var newArr = arr.slice();
+      for (var i = newArr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var temp = newArr[i];
+        newArr[i] = newArr[j];
+        newArr[j] = temp;
       }
+      return newArr;
     }
+
+    var questionPool = [
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/access%20panel%201.jpg", q: "What part of the house is this?", ans: "Access Panel", choices: ["Access Panel", "Utility Hatch", "Breaker Box", "Service Door"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/access%20panel%202.jpg", q: "What part of the house is this?", ans: "Access Panel", choices: ["Access Panel", "Utility Hatch", "Breaker Box", "Service Door"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/amenity%20lounge%20or%20commercial%20lobby%201.jpg", q: "What part of the house is this?", ans: "Amenity Lounge", choices: ["Amenity Lounge", "Recreation Room", "Clubhouse", "Waiting Area"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/amenity%20lounge%20or%20commercial%20lobby%202.jpg", q: "What part of the house is this?", ans: "Amenity Lounge", choices: ["Amenity Lounge", "Recreation Room", "Clubhouse", "Waiting Area"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/armoire%201.jpg", q: "What part of the house is this?", ans: "Armoire", choices: ["Armoire", "Wardrobe", "Dresser", "Freestanding Closet"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/armoire%202.jpg", q: "What part of the house is this?", ans: "Armoire", choices: ["Armoire", "Wardrobe", "Dresser", "Freestanding Closet"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/astroturf%201.jpg", q: "What part of the house is this?", ans: "Astroturf", choices: ["Astroturf", "Artificial Turf", "Sod", "Lawn"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/astroturf%202.jpg", q: "What part of the house is this?", ans: "Astroturf", choices: ["Astroturf", "Artificial Turf", "Sod", "Lawn"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/attic%201.jpg", q: "What part of the house is this?", ans: "Attic", choices: ["Attic", "Loft", "Crawlspace", "Mezzanine"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/attic%202.jpg", q: "What part of the house is this?", ans: "Attic", choices: ["Attic", "Loft", "Crawlspace", "Mezzanine"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/awning%201.jpg", q: "What part of the house is this?", ans: "Awning", choices: ["Awning", "Canopy", "Overhang", "Pergola"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/awning%202.jpg", q: "What part of the house is this?", ans: "Awning", choices: ["Awning", "Canopy", "Overhang", "Pergola"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/backsplash%201.jpg", q: "What part of the house is this?", ans: "Backsplash", choices: ["Backsplash", "Wall Tile", "Wainscoting", "Counter Flashing"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/backsplash%202.jpg", q: "What part of the house is this?", ans: "Backsplash", choices: ["Backsplash", "Wall Tile", "Wainscoting", "Counter Flashing"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/balcony%201.jpg", q: "What part of the house is this?", ans: "Balcony", choices: ["Balcony", "Terrace", "Deck", "Porch"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/balcony%202.jpg", q: "What part of the house is this?", ans: "Balcony", choices: ["Balcony", "Terrace", "Deck", "Porch"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/basement%201.jpg", q: "What part of the house is this?", ans: "Basement", choices: ["Basement", "Cellar", "Lower Level", "Crawlspace"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/basement%202.jpg", q: "What part of the house is this?", ans: "Basement", choices: ["Basement", "Cellar", "Lower Level", "Crawlspace"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/bathtub%201.jpg", q: "What part of the house is this?", ans: "Bathtub", choices: ["Bathtub", "Jacuzzi", "Hot Tub", "Shower Pan"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/bathtub%202.jpg", q: "What part of the house is this?", ans: "Bathtub", choices: ["Bathtub", "Jacuzzi", "Hot Tub", "Shower Pan"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/bedroom%201.jpg", q: "What part of the house is this?", ans: "Bedroom", choices: ["Bedroom", "Den", "Guest Room", "Office"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/bedroom%202.jpg", q: "What part of the house is this?", ans: "Bedroom", choices: ["Bedroom", "Den", "Guest Room", "Office"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/blind%201.jpg", q: "What part of the house is this?", ans: "Window Blinds", choices: ["Window Blinds", "Shades", "Shutters", "Drapes"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/blind%202.jpg", q: "What part of the house is this?", ans: "Window Blinds", choices: ["Window Blinds", "Shades", "Shutters", "Drapes"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/blind%20cord%201.jpg", q: "What part of the house is this?", ans: "Blind Cord", choices: ["Blind Cord", "Pull Chain", "Window Wand", "Shade String"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/blind%20cord%202.jpg", q: "What part of the house is this?", ans: "Blind Cord", choices: ["Blind Cord", "Pull Chain", "Window Wand", "Shade String"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/blind%20wand%201.jpg", q: "What part of the house is this?", ans: "Blind Wand", choices: ["Blind Wand", "Tilt Rod", "Blind Cord", "Window Crank"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/blind%20wand%202.jpg", q: "What part of the house is this?", ans: "Blind Wand", choices: ["Blind Wand", "Tilt Rod", "Blind Cord", "Window Crank"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/breakfast%20nook%201.jpg", q: "What part of the house is this?", ans: "Breakfast Nook", choices: ["Breakfast Nook", "Dining Area", "Kitchen Island", "Eat-in Kitchen"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/breakfast%20nook%202.jpg", q: "What part of the house is this?", ans: "Breakfast Nook", choices: ["Breakfast Nook", "Dining Area", "Kitchen Island", "Eat-in Kitchen"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/brickwall%201.jpg", q: "What part of the house is this?", ans: "Brick Wall", choices: ["Brick Wall", "Stone Veneer", "Masonry", "Cinder Block"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/brickwall%202.jpg", q: "What part of the house is this?", ans: "Brick Wall", choices: ["Brick Wall", "Stone Veneer", "Masonry", "Cinder Block"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/bungalow%201.jpg", q: "What type of house style is this?", ans: "Bungalow", choices: ["Bungalow", "Ranch", "Craftsman", "Cottage"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/bungalow%202.jpg", q: "What type of house style is this?", ans: "Bungalow", choices: ["Bungalow", "Ranch", "Craftsman", "Cottage"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/cabin%201.jpg", q: "What type of house style is this?", ans: "Cabin", choices: ["Cabin", "Chalet", "Lodge", "A-Frame"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/cabin%202.jpg", q: "What type of house style is this?", ans: "Cabin", choices: ["Cabin", "Chalet", "Lodge", "A-Frame"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/canopy%201.jpg", q: "What part of the house is this?", ans: "Canopy", choices: ["Canopy", "Awning", "Gazebo", "Pergola"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/canopy%202.jpg", q: "What part of the house is this?", ans: "Canopy", choices: ["Canopy", "Awning", "Gazebo", "Pergola"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/carpet%201.jpg", q: "What part of the house is this?", ans: "Carpet", choices: ["Carpet", "Area Rug", "Floor Mat", "Broadloom"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/carpet%202.jpg", q: "What part of the house is this?", ans: "Carpet", choices: ["Carpet", "Area Rug", "Floor Mat", "Broadloom"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/chandelier%201.jpg", q: "What part of the house is this?", ans: "Chandelier", choices: ["Chandelier", "Pendant Light", "Flush Mount", "Sconce"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/chandelier%202.jpg", q: "What part of the house is this?", ans: "Chandelier", choices: ["Chandelier", "Pendant Light", "Flush Mount", "Sconce"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/child%20safety%20strap%201.jpg", q: "What part of the house is this?", ans: "Child Safety Strap", choices: ["Child Safety Strap", "Furniture Anchor", "Anti-Tip Bracket", "Wall Tether"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/child%20safety%20strap%202.jpg", q: "What part of the house is this?", ans: "Child Safety Strap", choices: ["Child Safety Strap", "Furniture Anchor", "Anti-Tip Bracket", "Wall Tether"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/construction%20crane%201.jpg", q: "What is this?", ans: "Construction Crane", choices: ["Construction Crane", "Excavator", "Scaffolding", "Boom Lift"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/construction%20crane%202.jpg", q: "What is this?", ans: "Construction Crane", choices: ["Construction Crane", "Excavator", "Scaffolding", "Boom Lift"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/countertop%201.jpg", q: "What part of the house is this?", ans: "Countertop", choices: ["Countertop", "Kitchen Island", "Backsplash", "Butcher Block"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/countertop%202.jpg", q: "What part of the house is this?", ans: "Countertop", choices: ["Countertop", "Kitchen Island", "Backsplash", "Butcher Block"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/crown%20molding%201.jpg", q: "What part of the house is this?", ans: "Crown Molding", choices: ["Crown Molding", "Baseboard", "Chair Rail", "Wainscoting"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/crown%20molding%202.jpg", q: "What part of the house is this?", ans: "Crown Molding", choices: ["Crown Molding", "Baseboard", "Chair Rail", "Wainscoting"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/culdesac%201.jpg", q: "What is this feature?", ans: "Cul-de-sac", choices: ["Cul-de-sac", "Dead End", "Roundabout", "Court"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/culdesac%202.jpg", q: "What is this feature?", ans: "Cul-de-sac", choices: ["Cul-de-sac", "Dead End", "Roundabout", "Court"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/curbing%201.jpg", q: "What part of the house is this?", ans: "Landscape Curbing", choices: ["Landscape Curbing", "Edging", "Retaining Wall", "Paving"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/curbing%202.jpg", q: "What part of the house is this?", ans: "Landscape Curbing", choices: ["Landscape Curbing", "Edging", "Retaining Wall", "Paving"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/debris%201.jpg", q: "What is this?", ans: "Debris", choices: ["Debris", "Mulch", "Gravel", "Excavation Dirt"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/deck%201.jpg", q: "What part of the house is this?", ans: "Deck", choices: ["Deck", "Patio", "Balcony", "Porch"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/deck%202.jpg", q: "What part of the house is this?", ans: "Deck", choices: ["Deck", "Patio", "Balcony", "Porch"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/den%20or%20study%201.jpg", q: "What part of the house is this?", ans: "Den", choices: ["Den", "Home Office", "Library", "Living Room"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/den%20or%20study%202.jpg", q: "What part of the house is this?", ans: "Den", choices: ["Den", "Home Office", "Library", "Living Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/dining%20room%201.jpg", q: "What part of the house is this?", ans: "Dining Room", choices: ["Dining Room", "Breakfast Nook", "Kitchen", "Family Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/dining%20room%202.jpg", q: "What part of the house is this?", ans: "Dining Room", choices: ["Dining Room", "Breakfast Nook", "Kitchen", "Family Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/dishwasher%201.jpg", q: "What part of the house is this?", ans: "Dishwasher", choices: ["Dishwasher", "Trash Compactor", "Oven", "Wine Cooler"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/dishwasher%202.jpg", q: "What part of the house is this?", ans: "Dishwasher", choices: ["Dishwasher", "Trash Compactor", "Oven", "Wine Cooler"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/door%20stopper%201.jpg", q: "What part of the house is this?", ans: "Door Stopper", choices: ["Door Stopper", "Hinge Pin", "Baseboard Bumper", "Floor Catch"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/door%20stopper%202.jpg", q: "What part of the house is this?", ans: "Door Stopper", choices: ["Door Stopper", "Hinge Pin", "Baseboard Bumper", "Floor Catch"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/doormat%201.jpg", q: "What part of the house is this?", ans: "Doormat", choices: ["Doormat", "Area Rug", "Welcome Mat", "Runner"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/doormat%202.jpg", q: "What part of the house is this?", ans: "Doormat", choices: ["Doormat", "Area Rug", "Welcome Mat", "Runner"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/downspout%201.jpg", q: "What part of the house is this?", ans: "Downspout", choices: ["Downspout", "Gutter", "Rain Chain", "Drainage Pipe"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/downspout%202.jpg", q: "What part of the house is this?", ans: "Downspout", choices: ["Downspout", "Gutter", "Rain Chain", "Drainage Pipe"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/drape%201.jpg", q: "What part of the house is this?", ans: "Drapes", choices: ["Drapes", "Blinds", "Curtains", "Shades"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/drape%202.jpg", q: "What part of the house is this?", ans: "Drapes", choices: ["Drapes", "Blinds", "Curtains", "Shades"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/dressing%20room%201.jpg", q: "What part of the house is this?", ans: "Dressing Room", choices: ["Dressing Room", "Walk-in Closet", "Wardrobe", "Mudroom"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/dressing%20room%202.jpg", q: "What part of the house is this?", ans: "Dressing Room", choices: ["Dressing Room", "Walk-in Closet", "Wardrobe", "Mudroom"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/driveway%201.jpg", q: "What part of the house is this?", ans: "Driveway", choices: ["Driveway", "Walkway", "Carport", "Pathway"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/driveway%202.jpg", q: "What part of the house is this?", ans: "Driveway", choices: ["Driveway", "Walkway", "Carport", "Pathway"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/elevator%20lobby%20or%20corridor%201.jpg", q: "What part of the house is this?", ans: "Elevator Lobby", choices: ["Elevator Lobby", "Hallway", "Vestibule", "Foyer"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/elevator%20lobby%20or%20corridor%202.jpg", q: "What part of the house is this?", ans: "Elevator Lobby", choices: ["Elevator Lobby", "Hallway", "Vestibule", "Foyer"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/exhaust%20fan%201.jpg", q: "What part of the house is this?", ans: "Exhaust Fan", choices: ["Exhaust Fan", "Vent Cover", "Air Return", "Attic Fan"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/exhaust%20fan%202.jpg", q: "What part of the house is this?", ans: "Exhaust Fan", choices: ["Exhaust Fan", "Vent Cover", "Air Return", "Attic Fan"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/family%20room%20or%20great%20room%201.jpg", q: "What part of the house is this?", ans: "Great Room", choices: ["Great Room", "Living Room", "Den", "Recreation Room"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/family%20room%20or%20great%20room%202.jpg", q: "What part of the house is this?", ans: "Great Room", choices: ["Great Room", "Living Room", "Den", "Recreation Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/fencing%201.jpg", q: "What part of the house is this?", ans: "Fencing", choices: ["Fencing", "Retaining Wall", "Lattice", "Trellis"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/fencing%202.jpg", q: "What part of the house is this?", ans: "Fencing", choices: ["Fencing", "Retaining Wall", "Lattice", "Trellis"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/fireplace%20mantel%201.jpg", q: "What part of the house is this?", ans: "Fireplace Mantel", choices: ["Fireplace Mantel", "Hearth", "Chimney Breast", "Surround"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/fireplace%20mantel%202.jpg", q: "What part of the house is this?", ans: "Fireplace Mantel", choices: ["Fireplace Mantel", "Hearth", "Chimney Breast", "Surround"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/fountain%201.jpg", q: "What part of the house is this?", ans: "Fountain", choices: ["Fountain", "Birdbath", "Pond", "Water Feature"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/fountain%202.jpg", q: "What part of the house is this?", ans: "Fountain", choices: ["Fountain", "Birdbath", "Pond", "Water Feature"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/foyer%20or%20entryway%201.jpg", q: "What part of the house is this?", ans: "Foyer", choices: ["Foyer", "Mudroom", "Vestibule", "Hallway"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/foyer%20or%20entryway%202.jpg", q: "What part of the house is this?", ans: "Foyer", choices: ["Foyer", "Mudroom", "Vestibule", "Hallway"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/front%20doors%20or%20entry%20ports%201.jpg", q: "What part of the house is this?", ans: "Front Doors", choices: ["Front Doors", "French Doors", "Patio Doors", "Entry Portico"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/front%20doors%20or%20entry%20ports%202.jpg", q: "What part of the house is this?", ans: "Front Doors", choices: ["Front Doors", "French Doors", "Patio Doors", "Entry Portico"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/furniture%20tag%201.jpg", q: "What part of the house is this?", ans: "Furniture Tag", choices: ["Furniture Tag", "Price Label", "Upholstery Label", "Inspection Tag"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/gable%201.jpg", q: "What part of the house is this?", ans: "Gable", choices: ["Gable", "Dormer", "Eaves", "Fascia"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/gable%202.jpg", q: "What part of the house is this?", ans: "Gable", choices: ["Gable", "Dormer", "Eaves", "Fascia"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/garage%201.jpg", q: "What part of the house is this?", ans: "Garage", choices: ["Garage", "Carport", "Shed", "Workshop"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/garage%202.jpg", q: "What part of the house is this?", ans: "Garage", choices: ["Garage", "Carport", "Shed", "Workshop"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/gazebo%201.jpg", q: "What part of the house is this?", ans: "Gazebo", choices: ["Gazebo", "Pergola", "Pavilion", "Canopy"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/gazebo%202.jpg", q: "What part of the house is this?", ans: "Gazebo", choices: ["Gazebo", "Pergola", "Pavilion", "Canopy"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/green%20wall%201.jpg", q: "What part of the house is this?", ans: "Green Wall", choices: ["Green Wall", "Vertical Garden", "Ivy Trellis", "Living Wall"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/green%20wall%202.jpg", q: "What part of the house is this?", ans: "Green Wall", choices: ["Green Wall", "Vertical Garden", "Ivy Trellis", "Living Wall"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/greenhouse%201.jpg", q: "What part of the house is this?", ans: "Greenhouse", choices: ["Greenhouse", "Solarium", "Sunroom", "Conservatory"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/greenhouse%202.jpg", q: "What part of the house is this?", ans: "Greenhouse", choices: ["Greenhouse", "Solarium", "Sunroom", "Conservatory"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/gutter%201.jpg", q: "What part of the house is this?", ans: "Gutter", choices: ["Gutter", "Downspout", "Eaves", "Fascia Board"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/gutter%202.jpg", q: "What part of the house is this?", ans: "Gutter", choices: ["Gutter", "Downspout", "Eaves", "Fascia Board"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hallway%201.jpg", q: "What part of the house is this?", ans: "Hallway", choices: ["Hallway", "Corridor", "Foyer", "Landing"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hallway%202.jpg", q: "What part of the house is this?", ans: "Hallway", choices: ["Hallway", "Corridor", "Foyer", "Landing"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/handrail%201.jpg", q: "What part of the house is this?", ans: "Handrail", choices: ["Handrail", "Balustrade", "Banister", "Guardrail"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/handrail%202.jpg", q: "What part of the house is this?", ans: "Handrail", choices: ["Handrail", "Balustrade", "Banister", "Guardrail"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hearth%201.jpg", q: "What part of the house is this?", ans: "Hearth", choices: ["Hearth", "Mantel", "Firebox", "Chimney"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hearth%202.jpg", q: "What part of the house is this?", ans: "Hearth", choices: ["Hearth", "Mantel", "Firebox", "Chimney"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hedge%201.jpg", q: "What part of the house is this?", ans: "Hedge", choices: ["Hedge", "Shrubbery", "Topiary", "Privacy Screen"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hedge%202.jpg", q: "What part of the house is this?", ans: "Hedge", choices: ["Hedge", "Shrubbery", "Topiary", "Privacy Screen"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hinge%201.jpg", q: "What part of the house is this?", ans: "Door Hinge", choices: ["Door Hinge", "Strike Plate", "Latch", "Deadbolt"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hinge%202.jpg", q: "What part of the house is this?", ans: "Door Hinge", choices: ["Door Hinge", "Strike Plate", "Latch", "Deadbolt"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/home%20gym%20or%20fitness%20center%201.jpg", q: "What part of the house is this?", ans: "Home Gym", choices: ["Home Gym", "Recreation Room", "Yoga Studio", "Garage"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/home%20gym%20or%20fitness%20center%202.jpg", q: "What part of the house is this?", ans: "Home Gym", choices: ["Home Gym", "Recreation Room", "Yoga Studio", "Garage"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/home%20office%201.jpg", q: "What part of the house is this?", ans: "Home Office", choices: ["Home Office", "Den", "Study", "Library"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/home%20office%202.jpg", q: "What part of the house is this?", ans: "Home Office", choices: ["Home Office", "Den", "Study", "Library"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/home%20theater%201.jpg", q: "What part of the house is this?", ans: "Home Theater", choices: ["Home Theater", "Media Room", "Family Room", "Recreation Room"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/home%20theater%202.jpg", q: "What part of the house is this?", ans: "Home Theater", choices: ["Home Theater", "Media Room", "Family Room", "Recreation Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hot%20tub%201.jpg", q: "What part of the house is this?", ans: "Hot Tub", choices: ["Hot Tub", "Jacuzzi", "Spa", "Plunge Pool"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/hot%20tub%202.jpg", q: "What part of the house is this?", ans: "Hot Tub", choices: ["Hot Tub", "Jacuzzi", "Spa", "Plunge Pool"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/in%20ceiling%20speaker%201.jpg", q: "What part of the house is this?", ans: "In-Ceiling Speaker", choices: ["In-Ceiling Speaker", "Recessed Light", "Smoke Detector", "Exhaust Vent"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/in%20ceiling%20speaker%202.jpg", q: "What part of the house is this?", ans: "In-Ceiling Speaker", choices: ["In-Ceiling Speaker", "Recessed Light", "Smoke Detector", "Exhaust Vent"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/kitchen%201.jpg", q: "What part of the house is this?", ans: "Kitchen", choices: ["Kitchen", "Dining Room", "Pantry", "Break Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/kitchen%202.jpg", q: "What part of the house is this?", ans: "Kitchen", choices: ["Kitchen", "Dining Room", "Pantry", "Break Room"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/kitchen%20island%20or%20breakfast%20bar%201.jpg", q: "What part of the house is this?", ans: "Kitchen Island", choices: ["Kitchen Island", "Peninsula", "Breakfast Bar", "Prep Table"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/kitchen%20island%20or%20breakfast%20bar%202.jpg", q: "What part of the house is this?", ans: "Kitchen Island", choices: ["Kitchen Island", "Peninsula", "Breakfast Bar", "Prep Table"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/lake%201.jpg", q: "What is this feature?", ans: "Lake", choices: ["Lake", "Pond", "River", "Reservoir"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/5d738131fff238f4f72f910670f3b9922ffd14ec/materials/lake%202.jpg", q: "What is this feature?", ans: "Lake", choices: ["Lake", "Pond", "River", "Reservoir"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/landscape%20lighting%201.jpg", q: "What part of the house is this?", ans: "Landscape Lighting", choices: ["Landscape Lighting", "Pathway Light", "Floodlight", "Sconce"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/landscape%20lighting%202.jpg", q: "What part of the house is this?", ans: "Landscape Lighting", choices: ["Landscape Lighting", "Pathway Light", "Floodlight", "Sconce"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/laundry%20room%201.jpg", q: "What part of the house is this?", ans: "Laundry Room", choices: ["Laundry Room", "Mudroom", "Utility Room", "Pantry"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/laundry%20room%202.jpg", q: "What part of the house is this?", ans: "Laundry Room", choices: ["Laundry Room", "Mudroom", "Utility Room", "Pantry"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/lawn%20or%20grass%201.jpg", q: "What part of the house is this?", ans: "Lawn", choices: ["Lawn", "Astroturf", "Meadow", "Pasture"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/lawn%20or%20grass%202.jpg", q: "What part of the house is this?", ans: "Lawn", choices: ["Lawn", "Astroturf", "Meadow", "Pasture"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/living%20room%201.jpg", q: "What part of the house is this?", ans: "Living Room", choices: ["Living Room", "Family Room", "Great Room", "Den"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/living%20room%202.jpg", q: "What part of the house is this?", ans: "Living Room", choices: ["Living Room", "Family Room", "Great Room", "Den"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/lockbox%201.jpg", q: "What part of the house is this?", ans: "Lockbox", choices: ["Lockbox", "Keypad", "Security Camera", "Mailbox"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/lockbox%202.jpg", q: "What part of the house is this?", ans: "Lockbox", choices: ["Lockbox", "Keypad", "Security Camera", "Mailbox"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/mezzanine%201.jpg", q: "What part of the house is this?", ans: "Mezzanine", choices: ["Mezzanine", "Loft", "Balcony", "Catwalk"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/mezzanine%202.jpg", q: "What part of the house is this?", ans: "Mezzanine", choices: ["Mezzanine", "Loft", "Balcony", "Catwalk"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/modern%20or%20contemporary%201.jpg", q: "What type of house style is this?", ans: "Contemporary Style", choices: ["Contemporary Style", "Mid-Century Modern", "Minimalist", "Industrial"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/modern%20or%20contemporary%202.jpg", q: "What type of house style is this?", ans: "Contemporary Style", choices: ["Contemporary Style", "Mid-Century Modern", "Minimalist", "Industrial"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/mount%20rainer%201.jpg", q: "What is this feature?", ans: "Mount Rainier", choices: ["Mount Rainier", "Mount Baker", "Mount Hood", "Mount Adams"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/mount%20rainer%202.jpg", q: "What is this feature?", ans: "Mount Rainier", choices: ["Mount Rainier", "Mount Baker", "Mount Hood", "Mount Adams"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/mulch%201.jpg", q: "What part of the house is this?", ans: "Mulch", choices: ["Mulch", "Gravel", "Compost", "Soil"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/mulch%202.jpg", q: "What part of the house is this?", ans: "Mulch", choices: ["Mulch", "Gravel", "Compost", "Soil"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/ottoman%201.jpg", q: "What part of the house is this?", ans: "Ottoman", choices: ["Ottoman", "Footstool", "Pouf", "Coffee Table"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/ottoman%202.jpg", q: "What part of the house is this?", ans: "Ottoman", choices: ["Ottoman", "Footstool", "Pouf", "Coffee Table"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/ottoman%201.jpg", q: "What part of the house is this?", ans: "Roof Overhang", choices: ["Roof Overhang", "Eaves", "Soffit", "Awning"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/ottoman%202.jpg", q: "What part of the house is this?", ans: "Roof Overhang", choices: ["Roof Overhang", "Eaves", "Soffit", "Awning"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/overhang%201.jpg", q: "What part of the house is this?", ans: "Pantry", choices: ["Pantry", "Larder", "Utility Room", "Storage Closet"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/overhang%202.jpg", q: "What part of the house is this?", ans: "Pantry", choices: ["Pantry", "Larder", "Utility Room", "Storage Closet"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/patio%201.jpg", q: "What part of the house is this?", ans: "Patio", choices: ["Patio", "Deck", "Terrace", "Veranda"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/patio%202.jpg", q: "What part of the house is this?", ans: "Patio", choices: ["Patio", "Deck", "Terrace", "Veranda"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pendant%20light%201.jpg", q: "What part of the house is this?", ans: "Pendant Light", choices: ["Pendant Light", "Chandelier", "Sconce", "Track Lighting"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pendant%20light%202.jpg", q: "What part of the house is this?", ans: "Pendant Light", choices: ["Pendant Light", "Chandelier", "Sconce", "Track Lighting"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/penny%20round%20tile%201.jpg", q: "What part of the house is this?", ans: "Penny Round Tile", choices: ["Penny Round Tile", "Hexagon Tile", "Subway Tile", "Mosaic Tile"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/penny%20round%20tile%202.jpg", q: "What part of the house is this?", ans: "Penny Round Tile", choices: ["Penny Round Tile", "Hexagon Tile", "Subway Tile", "Mosaic Tile"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/perennial%20flower%201.jpg", q: "What part of the house is this?", ans: "Perennial Flower", choices: ["Perennial Flower", "Annual Flower", "Shrub", "Groundcover"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/perennial%20flower%202.jpg", q: "What part of the house is this?", ans: "Perennial Flower", choices: ["Perennial Flower", "Annual Flower", "Shrub", "Groundcover"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pergola%201.jpg", q: "What part of the house is this?", ans: "Pergola", choices: ["Pergola", "Arbor", "Gazebo", "Trellis"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pergola%202.jpg", q: "What part of the house is this?", ans: "Pergola", choices: ["Pergola", "Arbor", "Gazebo", "Trellis"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pergola%201.jpg", q: "What part of the house is this?", ans: "Pet Bed", choices: ["Pet Bed", "Floor Cushion", "Rug", "Mat"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pergola%202.jpg", q: "What part of the house is this?", ans: "Pet Bed", choices: ["Pet Bed", "Floor Cushion", "Rug", "Mat"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pillar%20lantern%201.jpg", q: "What part of the house is this?", ans: "Pillar Lantern", choices: ["Pillar Lantern", "Post Light", "Sconce", "Pathway Light"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pillar%20lantern%202.jpg", q: "What part of the house is this?", ans: "Pillar Lantern", choices: ["Pillar Lantern", "Post Light", "Sconce", "Pathway Light"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pleat%201.jpg", q: "What part of the house is this?", ans: "Curtain Pleat", choices: ["Curtain Pleat", "Drape Fold", "Valance", "Hem"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pleat%202.jpg", q: "What part of the house is this?", ans: "Curtain Pleat", choices: ["Curtain Pleat", "Drape Fold", "Valance", "Hem"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pond%201.jpg", q: "What part of the house is this?", ans: "Pond", choices: ["Pond", "Lake", "Fountain", "Water Garden"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/pond%202.jpg", q: "What part of the house is this?", ans: "Pond", choices: ["Pond", "Lake", "Fountain", "Water Garden"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/porch%201.jpg", q: "What part of the house is this?", ans: "Porch", choices: ["Porch", "Deck", "Patio", "Veranda"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/porch%202.jpg", q: "What part of the house is this?", ans: "Porch", choices: ["Porch", "Deck", "Patio", "Veranda"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/porta%20potty%201.jpg", q: "What is this feature?", ans: "Porta Potty", choices: ["Porta Potty", "Outhouse", "Restroom Trailer", "Shed"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/porta%20potty%202.jpg", q: "What is this feature?", ans: "Porta Potty", choices: ["Porta Potty", "Outhouse", "Restroom Trailer", "Shed"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/ranch%201.jpg", q: "What type of house style is this?", ans: "Ranch Style", choices: ["Ranch Style", "Bungalow", "Split-Level", "Rambler"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/ranch%202.jpg", q: "What type of house style is this?", ans: "Ranch Style", choices: ["Ranch Style", "Bungalow", "Split-Level", "Rambler"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/range%20hood%201.jpg", q: "What part of the house is this?", ans: "Range Hood", choices: ["Range Hood", "Exhaust Vent", "Microwave Over-the-Range", "Chimney"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/range%20hood%202.jpg", q: "What part of the house is this?", ans: "Range Hood", choices: ["Range Hood", "Exhaust Vent", "Microwave Over-the-Range", "Chimney"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/real%20estate%20sign%201.jpg", q: "What is this feature?", ans: "Real Estate Sign", choices: ["Real Estate Sign", "Yard Sign", "Open House Sign", "Directional Sign"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/real%20estate%20sign%202.jpg", q: "What is this feature?", ans: "Real Estate Sign", choices: ["Real Estate Sign", "Yard Sign", "Open House Sign", "Directional Sign"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/recessed%20lights%201.jpg", q: "What part of the house is this?", ans: "Recessed Lights", choices: ["Recessed Lights", "Can Lights", "Flush Mounts", "Spotlights"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/recessed%20lights%202.jpg", q: "What part of the house is this?", ans: "Recessed Lights", choices: ["Recessed Lights", "Can Lights", "Flush Mounts", "Spotlights"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/recreation%20room%20or%20game%20room%201.jpg", q: "What part of the house is this?", ans: "Recreation Room", choices: ["Recreation Room", "Home Theater", "Family Room", "Basement"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/recreation%20room%20or%20game%20room%202.jpg", q: "What part of the house is this?", ans: "Recreation Room", choices: ["Recreation Room", "Home Theater", "Family Room", "Basement"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/retaining%20wall%201.jpg", q: "What part of the house is this?", ans: "Retaining Wall", choices: ["Retaining Wall", "Garden Wall", "Freestanding Wall", "Foundation"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/retaining%20wall%202.jpg", q: "What part of the house is this?", ans: "Retaining Wall", choices: ["Retaining Wall", "Garden Wall", "Freestanding Wall", "Foundation"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/riser%201.jpg", q: "What part of the house is this?", ans: "Stair Riser", choices: ["Stair Riser", "Stair Tread", "Stringer", "Landing"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/riser%202.jpg", q: "What part of the house is this?", ans: "Stair Riser", choices: ["Stair Riser", "Stair Tread", "Stringer", "Landing"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/river%201.jpg", q: "What is this feature?", ans: "River", choices: ["River", "Stream", "Creek", "Canal"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/river%202.jpg", q: "What is this feature?", ans: "River", choices: ["River", "Stream", "Creek", "Canal"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/rotunda%201.jpg", q: "What part of the house is this?", ans: "Rotunda", choices: ["Rotunda", "Foyer", "Atrium", "Cupola"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/rotunda%202.jpg", q: "What part of the house is this?", ans: "Rotunda", choices: ["Rotunda", "Foyer", "Atrium", "Cupola"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/rug%201.jpg", q: "What part of the house is this?", ans: "Area Rug", choices: ["Area Rug", "Carpet", "Runner", "Mat"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/rug%202.jpg", q: "What part of the house is this?", ans: "Area Rug", choices: ["Area Rug", "Carpet", "Runner", "Mat"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/sauna%201.jpg", q: "What part of the house is this?", ans: "Sauna", choices: ["Sauna", "Steam Room", "Hot Tub", "Spa"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/sauna%202.jpg", q: "What part of the house is this?", ans: "Sauna", choices: ["Sauna", "Steam Room", "Hot Tub", "Spa"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/scaffolding%201.jpg", q: "What is this feature?", ans: "Scaffolding", choices: ["Scaffolding", "Rigging", "Platform", "Ladder"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/scaffolding%202.jpg", q: "What is this feature?", ans: "Scaffolding", choices: ["Scaffolding", "Rigging", "Platform", "Ladder"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/sconce%20light%201.jpg", q: "What part of the house is this?", ans: "Sconce Light", choices: ["Sconce Light", "Wall Lamp", "Flush Mount", "Vanity Light"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/sconce%20light%202.jpg", q: "What part of the house is this?", ans: "Sconce Light", choices: ["Sconce Light", "Wall Lamp", "Flush Mount", "Vanity Light"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/seam%201.jpg", q: "What part of the house is this?", ans: "Carpet Seam", choices: ["Carpet Seam", "Tile Grout", "Floor Transition", "Threshold"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/seam%202.jpg", q: "What part of the house is this?", ans: "Carpet Seam", choices: ["Carpet Seam", "Tile Grout", "Floor Transition", "Threshold"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/security%20sign%201.jpg", q: "What is this feature?", ans: "Security Sign", choices: ["Security Sign", "Alarm Decal", "Warning Sign", "Real Estate Sign"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/security%20sign%202.jpg", q: "What is this feature?", ans: "Security Sign", choices: ["Security Sign", "Alarm Decal", "Warning Sign", "Real Estate Sign"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shade%201.jpg", q: "What part of the house is this?", ans: "Window Shade", choices: ["Window Shade", "Blind", "Curtain", "Valance"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shade%202.jpg", q: "What part of the house is this?", ans: "Window Shade", choices: ["Window Shade", "Blind", "Curtain", "Valance"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shake%20siding%201.jpg", q: "What part of the house is this?", ans: "Shake Siding", choices: ["Shake Siding", "Shingle Siding", "Clapboard", "Board and Batten"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shake%20siding%202.jpg", q: "What part of the house is this?", ans: "Shake Siding", choices: ["Shake Siding", "Shingle Siding", "Clapboard", "Board and Batten"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shelving%201.jpg", q: "What part of the house is this?", ans: "Built-in Shelving", choices: ["Built-in Shelving", "Bookcase", "Cabinetry", "Floating Shelves"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shelving%202.jpg", q: "What part of the house is this?", ans: "Built-in Shelving", choices: ["Built-in Shelving", "Bookcase", "Cabinetry", "Floating Shelves"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shingle%20siding%201.jpg", q: "What part of the house is this?", ans: "Shingle Siding", choices: ["Shingle Siding", "Shake Siding", "Lap Siding", "Stucco"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shingle%20siding%202.jpg", q: "What part of the house is this?", ans: "Shingle Siding", choices: ["Shingle Siding", "Shake Siding", "Lap Siding", "Stucco"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shower%201.jpg", q: "What part of the house is this?", ans: "Shower", choices: ["Shower", "Bathtub", "Wet Room", "Steam Shower"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shower%202.jpg", q: "What part of the house is this?", ans: "Shower", choices: ["Shower", "Bathtub", "Wet Room", "Steam Shower"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shower%20caddy%201.jpg", q: "What part of the house is this?", ans: "Shower Caddy", choices: ["Shower Caddy", "Shower Niche", "Soap Dish", "Shelf"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shower%20caddy%202.jpg", q: "What part of the house is this?", ans: "Shower Caddy", choices: ["Shower Caddy", "Shower Niche", "Soap Dish", "Shelf"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shower%20niche%201.jpg", q: "What part of the house is this?", ans: "Shower Niche", choices: ["Shower Niche", "Shower Caddy", "Soap Dispenser", "Recessed Shelf"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shower%20niche%202.jpg", q: "What part of the house is this?", ans: "Shower Niche", choices: ["Shower Niche", "Shower Caddy", "Soap Dispenser", "Recessed Shelf"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shrub%201.jpg", q: "What part of the house is this?", ans: "Shrub", choices: ["Shrub", "Bush", "Hedge", "Small Tree"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shrub%202.jpg", q: "What part of the house is this?", ans: "Shrub", choices: ["Shrub", "Bush", "Hedge", "Small Tree"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shutter%201.jpg", q: "What part of the house is this?", ans: "Window Shutter", choices: ["Window Shutter", "Blind", "Shade", "Louver"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/shutter%202.jpg", q: "What part of the house is this?", ans: "Window Shutter", choices: ["Window Shutter", "Blind", "Shade", "Louver"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/smooth%20panel%20siding%201.jpg", q: "What part of the house is this?", ans: "Smooth Panel Siding", choices: ["Smooth Panel Siding", "Stucco", "Hardie Board", "Clapboard"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/smooth%20panel%20siding%202.jpg", q: "What part of the house is this?", ans: "Smooth Panel Siding", choices: ["Smooth Panel Siding", "Stucco", "Hardie Board", "Clapboard"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/solarium%201.jpg", q: "What part of the house is this?", ans: "Solarium", choices: ["Solarium", "Sunroom", "Greenhouse", "Conservatory"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/solarium%202.jpg", q: "What part of the house is this?", ans: "Solarium", choices: ["Solarium", "Sunroom", "Greenhouse", "Conservatory"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/space%20needle%201.jpg", q: "What is this feature?", ans: "Space Needle", choices: ["Space Needle", "Observation Tower", "Skyscraper", "Monorail"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/space%20needle%202.jpg", q: "What is this feature?", ans: "Space Needle", choices: ["Space Needle", "Observation Tower", "Skyscraper", "Monorail"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stable%201.jpg", q: "What part of the house is this?", ans: "Stable", choices: ["Stable", "Barn", "Shed", "Outbuilding"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stable%202.jpg", q: "What part of the house is this?", ans: "Stable", choices: ["Stable", "Barn", "Shed", "Outbuilding"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stair%20or%20landing%201.jpg", q: "What part of the house is this?", ans: "Stair Landing", choices: ["Stair Landing", "Staircase", "Steps", "Balcony"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stair%20or%20landing%202.jpg", q: "What part of the house is this?", ans: "Stair Landing", choices: ["Stair Landing", "Staircase", "Steps", "Balcony"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/standing%20water%201.jpg", q: "What is this issue?", ans: "Standing Water", choices: ["Standing Water", "Puddle", "Drainage Issue", "Wet Spot"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/standing%20water%202.jpg", q: "What is this issue?", ans: "Standing Water", choices: ["Standing Water", "Puddle", "Drainage Issue", "Wet Spot"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stone%20veneer%201.jpg", q: "What part of the house is this?", ans: "Stone Veneer", choices: ["Stone Veneer", "Brick Masonry", "Stucco", "Cultured Stone"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stone%20veneer%202.jpg", q: "What part of the house is this?", ans: "Stone Veneer", choices: ["Stone Veneer", "Brick Masonry", "Stucco", "Cultured Stone"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/stream%20or%20creek%201.jpg", q: "What is this feature?", ans: "Stream", choices: ["Stream", "River", "Canal", "Drainage Ditch"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/sunroom%201.jpg", q: "What part of the house is this?", ans: "Sunroom", choices: ["Sunroom", "Solarium", "Patio Enclosure", "Conservatory"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/392eafb9ec383b13216c873e5ec7ee319ff79a2b/materials/sunroom%202.jpg", q: "What part of the house is this?", ans: "Sunroom", choices: ["Sunroom", "Solarium", "Patio Enclosure", "Conservatory"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/terrace%201.jpg", q: "What part of the house is this?", ans: "Terrace", choices: ["Terrace", "Balcony", "Patio", "Deck"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/terrace%202.jpg", q: "What part of the house is this?", ans: "Terrace", choices: ["Terrace", "Balcony", "Patio", "Deck"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/traditional%201.jpg", q: "What type of house style is this?", ans: "Traditional Style", choices: ["Traditional Style", "Colonial", "Craftsman", "Victorian"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/traditional%202.jpg", q: "What type of house style is this?", ans: "Traditional Style", choices: ["Traditional Style", "Colonial", "Craftsman", "Victorian"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/tree%20crown%201.jpg", q: "What part of the house is this?", ans: "Tree Crown", choices: ["Tree Crown", "Canopy", "Branches", "Foliage"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/tree%20crown%202.jpg", q: "What part of the house is this?", ans: "Tree Crown", choices: ["Tree Crown", "Canopy", "Branches", "Foliage"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/tudor%20revival%201.jpg", q: "What type of house style is this?", ans: "Tudor Revival", choices: ["Tudor Revival", "English Cottage", "Craftsman", "Victorian"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/tudor%20revival%202.jpg", q: "What type of house style is this?", ans: "Tudor Revival", choices: ["Tudor Revival", "English Cottage", "Craftsman", "Victorian"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/vertical%20board%20and%20batten%201.jpg", q: "What part of the house is this?", ans: "Board and Batten", choices: ["Board and Batten", "Lap Siding", "Vertical Siding", "Shake Siding"] }, 
+      { tier: 3, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/vertical%20board%20and%20batten%202.jpg", q: "What part of the house is this?", ans: "Board and Batten", choices: ["Board and Batten", "Lap Siding", "Vertical Siding", "Shake Siding"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/walkways%20or%20pathway%201.jpg", q: "What part of the house is this?", ans: "Walkway", choices: ["Walkway", "Sidewalk", "Path", "Trail"] }, 
+      { tier: 1, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/walkways%20or%20pathway%202.jpg", q: "What part of the house is this?", ans: "Walkway", choices: ["Walkway", "Sidewalk", "Path", "Trail"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/window%20sill%201.jpg", q: "What part of the house is this?", ans: "Window Sill", choices: ["Window Sill", "Window Frame", "Sash", "Apron"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/window%20sill%202.jpg", q: "What part of the house is this?", ans: "Window Sill", choices: ["Window Sill", "Window Frame", "Sash", "Apron"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/wine%20cellar%201.jpg", q: "What part of the house is this?", ans: "Wine Cellar", choices: ["Wine Cellar", "Pantry", "Basement", "Storage Room"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/wine%20cellar%202.jpg", q: "What part of the house is this?", ans: "Wine Cellar", choices: ["Wine Cellar", "Pantry", "Basement", "Storage Room"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/wine%20cooler%201.jpg", q: "What part of the house is this?", ans: "Wine Cooler", choices: ["Wine Cooler", "Mini Fridge", "Beverage Center", "Kegerator"] }, 
+      { tier: 2, imgUrl: "https://raw.githubusercontent.com/abejrimgdeck-tech/photo-hunt/0350a9dec5e6303f4565f7ee9ecd1fd1cb4638f1/materials/wine%20cooler%202.jpg", q: "What part of the house is this?", ans: "Wine Cooler", choices: ["Wine Cooler", "Mini Fridge", "Beverage Center", "Kegerator"] }
+    ];
 
     // State Variables
     var currentUser = {}; var sessionQuestions = []; var currentQIndex = 0;
-    var score = 0; var timeRemaining = 600; // 10 minutes
+    var score = 0; var timeRemaining = 600;
     var userAnswers = []; var countdownInterval; var gifTimeout; 
     
-    // Audio State
     var bgmAudio = new Audio();
     var sfxAudioCorrect = new Audio(sfxCorrect);
     var sfxAudioWrong = new Audio(sfxWrong);
     var masterVolume = 0.5; var isMuted = false;
     var playlist = []; var currentTrackIndex = 0;
 
-    // ==========================================
-    // AUDIO ENGINE (Stackable SFX & BGM)
-    // ==========================================
     function updateVolume() {
       masterVolume = document.getElementById("vol-slider").value;
       if (bgmAudio) bgmAudio.volume = isMuted ? 0 : masterVolume;
@@ -261,13 +498,13 @@
     function playSfx(isCorrect) {
       if (isMuted) return;
       var sfx = isCorrect ? sfxAudioCorrect : sfxAudioWrong;
-      sfx.currentTime = 0; // Reset to stack over BGM
+      sfx.currentTime = 0; 
       sfx.play().catch(function(){});
     }
 
     function initPlaylist() {
       playlist = (currentUser.level >= 2) ? trackListLvl2.slice() : trackListAll.slice();
-      playlist.sort(function() { return Math.random() - 0.5; }); // Shuffle
+      playlist = shuffleArray(playlist);
       currentTrackIndex = 0;
       loadTrack();
     }
@@ -301,12 +538,8 @@
       if (!isMuted) { bgmAudio.play(); document.getElementById("play-pause-btn").innerText = "⏸"; }
     }
 
-    // Auto-next track when current finishes
     bgmAudio.addEventListener('ended', nextTrack);
 
-    // ==========================================
-    // LOGIN FLOW
-    // ==========================================
     function attemptAuth() {
       var uid = document.getElementById("userid").value.trim();
       var pass = document.getElementById("passcode").value.trim();
@@ -328,7 +561,6 @@
         currentUser = { userId: res.userId, level: res.level };
         document.getElementById("login-step-1").classList.add("hidden");
         document.getElementById("login-step-2").classList.remove("hidden");
-        // Focus the name input automatically
         document.getElementById("userName").focus();
       } else {
         showLoginError1(res.message);
@@ -361,30 +593,38 @@
       loadQuestion();
     }
 
-    // ==========================================
-    // GAME LOGIC
-    // ==========================================
     function buildSessionQuestions() {
-      sessionQuestions = [];
-      var poolCopy = questionPool.slice().sort(function() { return Math.random() - 0.5; });
-      sessionQuestions = poolCopy.slice(0, 50);
+      sessionQuestions = shuffleArray(questionPool).slice(0, 50);
     }
 
     function loadQuestion() {
-      if (currentQIndex >= sessionQuestions.length) return endQuiz();
+      if (currentQIndex >= sessionQuestions.length || sessionQuestions.length === 0) return endQuiz();
       
       var qData = sessionQuestions[currentQIndex];
       document.getElementById("question-counter").innerText = "Q: " + (currentQIndex + 1) + "/" + sessionQuestions.length;
       document.getElementById("quiz-image").src = qData.imgUrl;
       document.getElementById("question-text").innerText = qData.q;
 
+      // ==========================================
+      // NEW: IMAGE PRELOADER LOGIC
+      // Silently fetches the next 2 images in the background 
+      // while the candidate is answering the current one.
+      // ==========================================
+      for (var n = 1; n <= 2; n++) {
+        if (currentQIndex + n < sessionQuestions.length) {
+          var imgPreloader = new Image();
+          imgPreloader.src = sessionQuestions[currentQIndex + n].imgUrl;
+        }
+      }
+      // ==========================================
+
       var container = document.getElementById("choices-container");
       container.innerHTML = "";
       
-      var choicesCopy = qData.choices.slice();
-      choicesCopy.sort(function() { return Math.random() - 0.5; });
+      // Shuffle choices dynamically before rendering to ensure variety
+      var mixedChoices = shuffleArray(qData.choices);
       
-      choicesCopy.forEach(function(choice) {
+      mixedChoices.forEach(function(choice) {
         var btn = document.createElement("button");
         btn.className = "choice-btn"; btn.innerText = choice;
         btn.onclick = function(e) { checkAnswer(choice, qData.ans, e.target); };
@@ -412,14 +652,12 @@
       userAnswers.push({ question: sessionQuestions[currentQIndex].q, selected: selected, correct: correct, isCorrect: isCorrect });
       document.getElementById("score-counter").innerText = "Score: " + score;
       
-      // Show correct answer toast
       var toast = document.getElementById("correct-toast");
       toast.innerText = "Correct Answer: " + correct;
       toast.classList.remove("hidden");
       
       showCatMeme(isCorrect);
       
-      // Delay before next question to allow reading the toast
       setTimeout(function() { 
         toast.classList.add("hidden");
         currentQIndex++; loadQuestion(); 
@@ -454,7 +692,7 @@
 
     function endQuiz() {
       clearInterval(countdownInterval);
-      bgmAudio.pause(); // Stop standard BGM
+      bgmAudio.pause(); 
 
       document.getElementById("quiz-screen").classList.add("hidden");
       document.getElementById("cat-meme").classList.add("hidden");
@@ -503,7 +741,6 @@
         list.innerHTML += htmlString;
       });
 
-      // Auto-save when finished
       submitResults(true);
     }
 
@@ -553,7 +790,7 @@
         if (success) {
           btn.innerText = "Data Saved!"; 
           if(!isAuto) alert("Your score has been saved to the database.");
-          openLeaderboard(); // Show ranking after saving
+          openLeaderboard(); 
         } else {
           btn.innerText = "Save Failed"; 
           if(!isAuto) alert("There was an error saving your score.");
@@ -565,7 +802,6 @@
       var modal = document.getElementById("leaderboard-modal");
       var list = document.getElementById("leaderboard-list");
       
-      // Set modal styling to allow scrolling for 100 items
       modal.style.maxHeight = "80vh";
       modal.style.overflowY = "auto";
       
@@ -580,7 +816,6 @@
         }
         
         data.forEach(function(entry, index) {
-          // Logic for top 3 medals vs standard ranking
           var label = (index + 1) + ". ";
           if (index === 0) label = "🥇 Gold: ";
           else if (index === 1) label = "🥈 Silver: ";
@@ -590,7 +825,7 @@
           div.style.padding = "8px"; 
           div.style.borderBottom = "1px solid #4A7055"; 
           div.style.textAlign = "left";
-          div.innerHTML = "<strong>" + label + entry.name + "</strong> - " + entry.score + " pts";
+          div.innerHTML = "<strong>" + label + entry.name + " (" + entry.displayDate + ")</strong> - " + entry.score + " pts";
           list.appendChild(div);
         });
       }).getLeaderboard();
