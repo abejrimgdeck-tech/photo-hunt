@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root { --bg-color: #2F4F4F; --card-bg: #355E3B; --accent: #50C878; --text-light: #F0FFF0; --text-dark: #1A2421; --danger: #FF6B6B; }
+    
+    /* ANTI-CHEAT: Prevent text selection */
+    body {
+      font-family: 'Lexend', sans-serif; background-color: var(--bg-color); color: var(--text-light);
+      margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh;
+      -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+    }
+
+    .container { background-color: var(--card-bg); padding: 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); max-width: 600px; width: 100%; text-align: center; position: relative; z-index: 10; }
+    h1 { margin-top: 0; color: var(--accent); }
+    input[type="text"], input[type="password"], input[type="email"] { display: block; width: 90%; margin: 10px auto; padding: 10px; border-radius: 6px; border: none; font-family: 'Lexend', sans-serif; box-sizing: border-box; }
+    button { background-color: var(--accent); color: var(--text-dark); border: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; font-family: 'Lexend', sans-serif; transition: 0.2s; margin: 5px; }
+    button:hover { background-color: #3CB371; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .choice-btn { display: block; width: 100%; margin: 10px 0; background-color: #4A7055; color: white; }
+    .choice-btn:hover:not(:disabled) { background-color: var(--accent); color: var(--text-dark); }
+    .choice-correct { background-color: #50C878 !important; color: #1A2421 !important; }
+    .choice-wrong { background-color: #FF6B6B !important; color: white !important; }
+    .hidden { display: none !important; }
+
+    #quiz-image { max-width: 100%; max-height: 500px; object-fit: contain; border-radius: 8px; margin-bottom: 15px; background-color: #1A2421; transition: transform 0.3s ease; }
+    #quiz-image:hover { transform: scale(1.05); } 
+    
+    .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 0.9em; border-bottom: 1px solid #4A7055; padding-bottom: 10px; font-weight: 600; }
+    .time-warning { color: var(--danger) !important; font-size: 1.1em; }
+
+    /* Correct Answer Toast Notification */
+    #correct-toast {
+      position: absolute; top: 15px; left: 15px; background: rgba(26, 36, 33, 0.9);
+      color: var(--accent); padding: 8px 12px; border-radius: 6px; font-weight: 600;
+      font-size: 0.9em; z-index: 100; border: 1px solid var(--accent);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4); pointer-events: none;
+    }
+
+    /* UI Layout Adjustments */
+    #mini-player { position: fixed; bottom: 20px; left: 20px; background: var(--card-bg); padding: 12px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); z-index: 1000; text-align: left; }
+    #mini-player-controls { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+    #mini-player button { padding: 5px 10px; margin: 0; background-color: #4A7055; color: white; }
+    #track-name { font-size: 0.8em; color: var(--accent); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    input[type=range] { width: 80px; cursor: pointer; margin: 0; }
+
+    #fun-mode-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; font-size: 0.85em; background: #2F4F4F; padding: 10px 20px; border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); z-index: 1000; }
+    #fun-mode-container input { margin-right: 8px; cursor: pointer; transform: scale(1.2); }
+
+    #cat-meme { position: fixed; bottom: 80px; right: 20px; width: 300px; border-radius: 8px; z-index: 1000; pointer-events: none; box-shadow: 0 8px 16px rgba(0,0,0,0.6); }
+    
+    /* ANTI-CHEAT BLUR SCREEN */
+    #cheat-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; color: var(--danger); font-size: 1.5em; text-align: center; }
+
+    #leaderboard-modal {
+      max-height: 80vh;
+      overflow-y: auto;
+      scrollbar-width: thin; /* Makes scrollbar slim on Firefox */
+    }
+  </style>
+</head>
+<body>
+
+  <div id="cheat-overlay" class="hidden">
+    <h1>⚠️ WARNING</h1>
+    <p>You have left the test window.<br>Return to the game to continue.</p>
+  </div>
+
+  <div id="mini-player" class="hidden">
+    <div id="track-name">Loading...</div>
+    <div id="mini-player-controls">
+      <button onclick="prevTrack()">⏮</button>
+      <button id="play-pause-btn" onclick="togglePlay()">⏸</button>
+      <button onclick="nextTrack()">⏭</button>
+      <button id="mute-btn" onclick="toggleMute()">🔊</button>
+      <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.5" oninput="updateVolume()">
+    </div>
+  </div>
+
+  <div id="fun-mode-container" class="hidden">
+    <input type="checkbox" id="fun-mode-toggle"> 
+    <label for="fun-mode-toggle"><strong>Fun Mode GIFs</strong></label>
+  </div>
+
+  <div id="login-step-1" class="container">
+    <h1>📸 PHOTO HUNT GUESSING GAME</h1>
+    <p>Portal Access: Please enter your credentials.</p>
+    <input type="text" id="userid" placeholder="🆔 User ID">
+    <input type="password" id="passcode" placeholder="🗝️ Passcode">
+    <button onclick="attemptAuth()">Verify ID</button>
+    <button onclick="openLeaderboard()" style="background-color: #4A7055; color: white;">🏆 Leaderboard</button>
+    <p id="login-error-1" style="color: #FF6B6B; display: none;"></p>
+  </div>
+
+  <div id="login-step-2" class="container hidden">
+    <h1>👤 TRAINEE PROFILE</h1>
+    <p>ID Verified! Please enter your details for the scoreboard.</p>
+    <input type="text" id="userName" placeholder="Your Name">
+    <input type="email" id="userEmail" placeholder="Your Gmail Address">
+    <button onclick="startGame()">Start Game</button>
+    <p id="login-error-2" style="color: #FF6B6B; display: none;"></p>
+  </div>
+
+  <div id="quiz-screen" class="container hidden">
+    <div id="correct-toast" class="hidden">Correct Answer: </div>
+    
+    <div class="header-info">
+      <span id="question-counter">Q: 1/50</span>
+      <span id="score-counter">Score: 0</span>
+      <span id="timer-display">⏱️ 10:00</span>
+    </div>
+    <img id="quiz-image" src="" alt="Property Image">
+    <h3 id="question-text">Loading question...</h3>
+    <div id="choices-container"></div>
+  </div>
+
+  <div id="review-screen" class="container hidden">
+    <h1 id="review-title">Hunt Complete!</h1>
+    <h2>Final Score: <span id="final-score"></span>/50 (<span id="final-percentage"></span>%)</h2>
+    <p id="final-time" class="hidden"></p>
+    <div id="review-list" style="text-align: left; max-height: 250px; overflow-y: auto; margin-top: 20px; padding-right: 10px;"></div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+      <button onclick="softReset()">Reset & Return to Portal</button>
+      <button id="save-btn" onclick="submitResults()">Save Scoreboard</button>
+    </div>
+  </div>
+
+  <div id="leaderboard-modal" class="container hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;">
+    <h1>🏆 Top 10 Hunters</h1>
+    <div id="leaderboard-list"></div>
+    <button onclick="document.getElementById('leaderboard-modal').classList.add('hidden')" style="margin-top: 20px;">Close</button>
+  </div>
+
+  <img id="cat-meme" class="hidden" src="" alt="Cat Meme">
+
+  <script>
+    // ==========================================
+    // ANTI-CHEAT MEASURES
+    // ==========================================
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); }); // Block right click
+    document.addEventListener('copy', function(e) { e.preventDefault(); }); // Block copy
+    
+    window.addEventListener('blur', function() {
+      if(!document.getElementById('quiz-screen').classList.contains('hidden')) {
+        document.getElementById('cheat-overlay').classList.remove('hidden');
+      }
+    });
+    window.addEventListener('focus', function() { document.getElementById('cheat-overlay').classList.add('hidden'); });
+
+    // Enter Key Bindings for Menus
+    document.getElementById("login-step-1").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") attemptAuth();
+    });
+    document.getElementById("login-step-2").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") startGame();
+    });
+
+    // ==========================================
+    // GITHUB RAW MEDIA MAPPER
+    // ==========================================
+    var ghBase = "https://raw.githubusercontent.com/aebbey/files/1d6618c41c11a702fd668374649e994068ff371a/";
+    
+    var sfxCorrect = ghBase + "Background%20Music%20and%20SFX/correct-ding-sound-effect-hd.mp3";
+    var sfxWrong = ghBase + "Background%20Music%20and%20SFX/wrong-answer-sound-effect.mp3";
+
+    var trackListAll = [
+      { url: ghBase + "Background%20Music%20and%20SFX/dogs-and-puppies.mp3", name: "Dogs and Puppies" },
+      { url: ghBase + "Background%20Music%20and%20SFX/es-the-cool-fool-5-martin-landh.mp3", name: "The Cool Fool" },
+      { url: ghBase + "Background%20Music%20and%20SFX/for-my-people-by-matt-large-1990s-hip-hop-music.mp3", name: "For My People" }
+    ];
+    
+    var trackListLvl2 = trackListAll.concat([
+      { url: ghBase + "Background%20Music%20and%20SFX/c418-haggstrom-minecraft-volume-alpha.mp3", name: "Haggstrom (C418)" },
+      { url: ghBase + "Background%20Music%20and%20SFX/c418-sweden-minecraft-volume-alpha.mp3", name: "Sweden (C418)" },
+      { url: ghBase + "Background%20Music%20and%20SFX/c418-wet-hands-minecraft-volume-alpha.mp3", name: "Wet Hands (C418)" },
+      { url: ghBase + "Background%20Music%20and%20SFX/martin-gauffin-southern-flavors-1.mp3", name: "Southern Flavors" },
+      { url: ghBase + "Background%20Music%20and%20SFX/minecraft-music-calm-1.mp3", name: "Calm 1" },
+      { url: ghBase + "Background%20Music%20and%20SFX/tarantulas-by-christian-nanzell-electro-music.mp3", name: "Tarantulas" }
+    ]);
+
+    var passMusic = [
+      ghBase + "Background%20Music%20and%20SFX/c418-cat-minecraft-volume-alpha.mp3",
+      ghBase + "Background%20Music%20and%20SFX/call-of-the-north-niklas-johansson-gaming-music.mp3",
+      ghBase + "Background%20Music%20and%20SFX/dreaming-of-sunshine.mp3",
+      ghBase + "Background%20Music%20and%20SFX/lets-bounce-by-gavin-luke-electro-swing-music.mp3",
+      ghBase + "Background%20Music%20and%20SFX/pew-news-theme-2018-full-version.mp3",
+      ghBase + "Background%20Music%20and%20SFX/rise-of-the-phoenix-1-by-johannes-bornlf-action-music.mp3"
+    ];
+
+    var failMusic = [
+      ghBase + "Background%20Music%20and%20SFX/beautiful-spanish-music-acoustic-delight-2-johan-hynynen.mp3",
+      ghBase + "Background%20Music%20and%20SFX/peaceful-pianos-10-martin-klem.mp3",
+      ghBase + "Background%20Music%20and%20SFX/peaceful-pianos-18-classical-piano.mp3",
+      ghBase + "Background%20Music%20and%20SFX/youre-not-here.mp3"
+    ];
+
+    var winGifs = ["w1.gif", "w2.gif", "w3.gif", "w4.gif", "w5.gif", "w6.gif", "w7.gif", "w8.gif", "w9.gif", "w10.gif"];
+    var loseGifs = ["l1.gif", "l2.gif", "l3.gif", "l4.gif", "l5.gif", "l6.gif", "l7.gif", "l8.gif", "l9.gif", "l10.gif", "l11.gif"];
+
+    // ==========================================
+    // QUESTION MAPPER (lh3 conversion)
+    // Categories: 1 (Easy), 2 (Medium), 3 (Hard)
+    // ==========================================
+    var driveBase = "https://lh3.googleusercontent.com/d/";
+    
+    // Paste all of your questions in here!
+    var questionPoolRaw = [
+          // Access Panel
+          { tier: 2, id: "https://github.com/abejrimgdeck-tech/photo-hunt/blob/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/access%20panel%201.jpg", q: "What part of the house or feature is this?", ans: "Access Panel", choices: ["Access Panel", "Service Door", "Utility Hatch", "Inspection Panel"] },
+          { tier: 2, id: "https://github.com/abejrimgdeck-tech/photo-hunt/blob/d9df15a42697bde8ca06699cb2540b4686eeb953/materials/access%20panel%202.jpg", q: "Identify the feature shown in the photo:", ans: "Access Panel", choices: ["Access Panel", "Service Door", "Utility Hatch", "Inspection Panel"] }
+    ];
+
+    // Build unique, fully formatted question pool
+    var questionPool = [];
+    var usedIds = {};
+    for(var p=0; p<questionPoolRaw.length; p++) {
+      if(!usedIds[questionPoolRaw[p].id]) {
+        usedIds[questionPoolRaw[p].id] = true;
+        questionPool.push({
+          tier: questionPoolRaw[p].tier,
+          imgUrl: driveBase + questionPoolRaw[p].id,
+          q: questionPoolRaw[p].q,
+          ans: questionPoolRaw[p].ans,
+          choices: questionPoolRaw[p].choices
+        });
+      }
+    }
+
+    // State Variables
+    var currentUser = {}; var sessionQuestions = []; var currentQIndex = 0;
+    var score = 0; var timeRemaining = 600; // 10 minutes
+    var userAnswers = []; var countdownInterval; var gifTimeout; 
+    
+    // Audio State
+    var bgmAudio = new Audio();
+    var sfxAudioCorrect = new Audio(sfxCorrect);
+    var sfxAudioWrong = new Audio(sfxWrong);
+    var masterVolume = 0.5; var isMuted = false;
+    var playlist = []; var currentTrackIndex = 0;
+
+    // ==========================================
+    // AUDIO ENGINE (Stackable SFX & BGM)
+    // ==========================================
+    function updateVolume() {
+      masterVolume = document.getElementById("vol-slider").value;
+      if (bgmAudio) bgmAudio.volume = isMuted ? 0 : masterVolume;
+      sfxAudioCorrect.volume = isMuted ? 0 : masterVolume;
+      sfxAudioWrong.volume = isMuted ? 0 : masterVolume;
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      document.getElementById("mute-btn").innerText = isMuted ? "🔇" : "🔊";
+      updateVolume();
+    }
+
+    function playSfx(isCorrect) {
+      if (isMuted) return;
+      var sfx = isCorrect ? sfxAudioCorrect : sfxAudioWrong;
+      sfx.currentTime = 0; // Reset to stack over BGM
+      sfx.play().catch(function(){});
+    }
+
+    function initPlaylist() {
+      playlist = (currentUser.level >= 2) ? trackListLvl2.slice() : trackListAll.slice();
+      playlist.sort(function() { return Math.random() - 0.5; }); // Shuffle
+      currentTrackIndex = 0;
+      loadTrack();
+    }
+
+    function loadTrack() {
+      if (playlist.length === 0) return;
+      bgmAudio.src = playlist[currentTrackIndex].url;
+      bgmAudio.volume = isMuted ? 0 : masterVolume;
+      document.getElementById("track-name").innerText = "🎵 " + playlist[currentTrackIndex].name;
+    }
+
+    function togglePlay() {
+      if (bgmAudio.paused) {
+        bgmAudio.play();
+        document.getElementById("play-pause-btn").innerText = "⏸";
+      } else {
+        bgmAudio.pause();
+        document.getElementById("play-pause-btn").innerText = "▶";
+      }
+    }
+
+    function nextTrack() {
+      currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+      loadTrack();
+      if (!isMuted) { bgmAudio.play(); document.getElementById("play-pause-btn").innerText = "⏸"; }
+    }
+
+    function prevTrack() {
+      currentTrackIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
+      loadTrack();
+      if (!isMuted) { bgmAudio.play(); document.getElementById("play-pause-btn").innerText = "⏸"; }
+    }
+
+    // Auto-next track when current finishes
+    bgmAudio.addEventListener('ended', nextTrack);
+
+    // ==========================================
+    // LOGIN FLOW
+    // ==========================================
+    function attemptAuth() {
+      var uid = document.getElementById("userid").value.trim();
+      var pass = document.getElementById("passcode").value.trim();
+      if (!uid || !pass) return showLoginError1("Please fill out all fields.");
+      
+      document.querySelector("#login-step-1 button").innerText = "Loading...";
+      google.script.run.withSuccessHandler(handleAuthResponse).verifyLogin(uid, pass);
+    }
+
+    function showLoginError1(msg) {
+      var err = document.getElementById("login-error-1");
+      err.innerText = msg; err.style.display = "block";
+      document.querySelector("#login-step-1 button").innerText = "Verify ID";
+    }
+
+    function handleAuthResponse(res) {
+      if (!res) { showLoginError1("Server Error."); return; }
+      if (res.success) {
+        currentUser = { userId: res.userId, level: res.level };
+        document.getElementById("login-step-1").classList.add("hidden");
+        document.getElementById("login-step-2").classList.remove("hidden");
+        // Focus the name input automatically
+        document.getElementById("userName").focus();
+      } else {
+        showLoginError1(res.message);
+      }
+    }
+
+    function startGame() {
+      var name = document.getElementById("userName").value.trim();
+      var email = document.getElementById("userEmail").value.trim();
+      if (!name || !email) {
+        var err = document.getElementById("login-error-2");
+        err.innerText = "Name and Gmail are required."; err.style.display = "block";
+        return;
+      }
+      
+      currentUser.name = name;
+      currentUser.gmail = email;
+
+      document.getElementById("login-step-2").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.remove("hidden");
+      document.getElementById("mini-player").classList.remove("hidden"); 
+      
+      if (currentUser.level >= 2) document.getElementById("fun-mode-container").classList.remove("hidden");
+      
+      initPlaylist();
+      if (!isMuted) { bgmAudio.play().catch(function(){}); document.getElementById("play-pause-btn").innerText = "⏸"; }
+      
+      buildSessionQuestions(); 
+      startCountdown();
+      loadQuestion();
+    }
+
+    // ==========================================
+    // GAME LOGIC
+    // ==========================================
+    function buildSessionQuestions() {
+      sessionQuestions = [];
+      var poolCopy = questionPool.slice().sort(function() { return Math.random() - 0.5; });
+      sessionQuestions = poolCopy.slice(0, 50);
+    }
+
+    function loadQuestion() {
+      if (currentQIndex >= sessionQuestions.length) return endQuiz();
+      
+      var qData = sessionQuestions[currentQIndex];
+      document.getElementById("question-counter").innerText = "Q: " + (currentQIndex + 1) + "/" + sessionQuestions.length;
+      document.getElementById("quiz-image").src = qData.imgUrl;
+      document.getElementById("question-text").innerText = qData.q;
+
+      var container = document.getElementById("choices-container");
+      container.innerHTML = "";
+      
+      var choicesCopy = qData.choices.slice();
+      choicesCopy.sort(function() { return Math.random() - 0.5; });
+      
+      choicesCopy.forEach(function(choice) {
+        var btn = document.createElement("button");
+        btn.className = "choice-btn"; btn.innerText = choice;
+        btn.onclick = function(e) { checkAnswer(choice, qData.ans, e.target); };
+        container.appendChild(btn);
+      });
+    }
+
+    function checkAnswer(selected, correct, btnElement) {
+      var buttons = document.querySelectorAll(".choice-btn");
+      for (var i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+      
+      var isCorrect = (selected === correct);
+      
+      if (isCorrect) {
+        score++; btnElement.classList.add("choice-correct");
+        playSfx(true);
+      } else {
+        btnElement.classList.add("choice-wrong");
+        playSfx(false);
+        for (var j = 0; j < buttons.length; j++) {
+          if (buttons[j].innerText === correct) buttons[j].classList.add("choice-correct");
+        }
+      }
+      
+      userAnswers.push({ question: sessionQuestions[currentQIndex].q, selected: selected, correct: correct, isCorrect: isCorrect });
+      document.getElementById("score-counter").innerText = "Score: " + score;
+      
+      // Show correct answer toast
+      var toast = document.getElementById("correct-toast");
+      toast.innerText = "Correct Answer: " + correct;
+      toast.classList.remove("hidden");
+      
+      showCatMeme(isCorrect);
+      
+      // Delay before next question to allow reading the toast
+      setTimeout(function() { 
+        toast.classList.add("hidden");
+        currentQIndex++; loadQuestion(); 
+      }, 1500); 
+    }
+
+    function showCatMeme(isCorrect) {
+      if (currentUser.level < 2 || !document.getElementById("fun-mode-toggle").checked) return;
+      
+      var meme = document.getElementById("cat-meme");
+      var arr = isCorrect ? winGifs : loseGifs;
+      var fileId = arr[Math.floor(Math.random() * arr.length)];
+      
+      meme.src = ghBase + "Cat%20Meme%20Gif/" + fileId;
+      meme.classList.remove("hidden");
+
+      clearTimeout(gifTimeout);
+      gifTimeout = setTimeout(function() { meme.classList.add("hidden"); }, 5000); 
+    }
+
+    function startCountdown() {
+      document.getElementById("timer-display").innerText = "⏱️ 10:00";
+      countdownInterval = setInterval(function() {
+        if (timeRemaining <= 0) { clearInterval(countdownInterval); endQuiz(); return; }
+        timeRemaining--;
+        var m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+        var s = (timeRemaining % 60).toString().padStart(2, '0');
+        document.getElementById("timer-display").innerText = "⏱️ " + m + ":" + s;
+        if (timeRemaining <= 60) document.getElementById("timer-display").classList.add("time-warning");
+      }, 1000);
+    }
+
+    function endQuiz() {
+      clearInterval(countdownInterval);
+      bgmAudio.pause(); // Stop standard BGM
+
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("cat-meme").classList.add("hidden");
+      document.getElementById("review-screen").classList.remove("hidden");
+      document.getElementById("mini-player").classList.add("hidden");
+      document.getElementById("fun-mode-container").classList.add("hidden");
+      
+      var isFunMode = document.getElementById("fun-mode-toggle").checked;
+      var totalQ = sessionQuestions.length;
+      var pct = totalQ > 0 ? Math.round((score / totalQ) * 100) : 0;
+      
+      document.getElementById("final-score").innerText = score;
+      document.getElementById("final-percentage").innerText = pct;
+      
+      var m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+      var s = (timeRemaining % 60).toString().padStart(2, '0');
+      document.getElementById("final-time").innerText = "Time Remaining: " + m + ":" + s;
+      document.getElementById("final-time").classList.remove("hidden");
+
+      if (pct >= 80) {
+        document.getElementById("review-title").innerText = "🎉 Congratulations, You Passed!";
+        triggerConfetti();
+        if (isFunMode && currentUser.level >= 2 && passMusic.length > 0) {
+          bgmAudio.src = passMusic[Math.floor(Math.random() * passMusic.length)];
+          if(!isMuted) bgmAudio.play();
+        } else {
+          playSfx(true);
+        }
+      } else {
+        document.getElementById("review-title").innerText = "❌ You did not pass. Keep studying!";
+        if (isFunMode && currentUser.level >= 2 && failMusic.length > 0) {
+          bgmAudio.src = failMusic[Math.floor(Math.random() * failMusic.length)];
+          if(!isMuted) bgmAudio.play();
+        } else {
+          playSfx(false);
+        }
+      }
+
+      var list = document.getElementById("review-list");
+      list.innerHTML = "";
+      userAnswers.forEach(function(ans, i) {
+        var color = ans.isCorrect ? "#50C878" : "#FF6B6B";
+        var htmlString = "<div style='margin-bottom:12px; color:" + color + "; font-size: 0.9em; border-bottom: 1px solid #4A7055; padding-bottom: 5px;'>";
+        htmlString += "<strong>" + (i + 1) + ". " + ans.question + "</strong><br>";
+        htmlString += "Your Answer: " + ans.selected + " | Correct: " + ans.correct + "</div>";
+        list.innerHTML += htmlString;
+      });
+
+      // Auto-save when finished
+      submitResults(true);
+    }
+
+    function triggerConfetti() {
+      var end = Date.now() + 3000;
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#50C878', '#ffffff'] });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#50C878', '#ffffff'] });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      }());
+    }
+
+    function softReset() {
+      bgmAudio.pause();
+      clearInterval(countdownInterval); clearTimeout(gifTimeout);
+      
+      score = 0; currentQIndex = 0; timeRemaining = 600; userAnswers = [];
+      
+      document.getElementById("fun-mode-toggle").checked = false;
+      document.getElementById("timer-display").classList.remove("time-warning");
+      document.getElementById("timer-display").innerText = "⏱️ 10:00";
+      
+      document.getElementById("review-screen").classList.add("hidden");
+      document.getElementById("quiz-screen").classList.add("hidden");
+      document.getElementById("mini-player").classList.add("hidden");
+      document.getElementById("fun-mode-container").classList.add("hidden");
+      document.getElementById("login-step-2").classList.add("hidden");
+      
+      var btn = document.getElementById("save-btn");
+      btn.disabled = false; btn.innerText = "Save Scoreboard";
+      
+      document.querySelector("#login-step-1 button").innerText = "Verify ID";
+      document.getElementById("userid").value = "";
+      document.getElementById("passcode").value = "";
+      document.getElementById("login-step-1").classList.remove("hidden");
+    }
+
+    function submitResults(isAuto) {
+      var btn = document.getElementById("save-btn");
+      btn.innerText = "Saving Data..."; btn.disabled = true;
+
+      var m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+      var s = (timeRemaining % 60).toString().padStart(2, '0');
+      var data = { userId: currentUser.userId, name: currentUser.name, gmail: currentUser.gmail, level: currentUser.level, score: score, timeRemaining: m + ":" + s };
+      
+      google.script.run.withSuccessHandler(function(success) {
+        if (success) {
+          btn.innerText = "Data Saved!"; 
+          if(!isAuto) alert("Your score has been saved to the database.");
+          openLeaderboard(); // Show ranking after saving
+        } else {
+          btn.innerText = "Save Failed"; 
+          if(!isAuto) alert("There was an error saving your score.");
+        }
+      }).saveResult(data);
+    }
+
+    function openLeaderboard() {
+      var modal = document.getElementById("leaderboard-modal");
+      var list = document.getElementById("leaderboard-list");
+      
+      // Set modal styling to allow scrolling for 100 items
+      modal.style.maxHeight = "80vh";
+      modal.style.overflowY = "auto";
+      
+      list.innerHTML = "Loading..."; 
+      modal.classList.remove("hidden");
+      
+      google.script.run.withSuccessHandler(function(data) {
+        list.innerHTML = "";
+        if (!data || data.length === 0) { 
+          list.innerHTML = "<p>No scores recorded yet!</p>"; 
+          return; 
+        }
+        
+        data.forEach(function(entry, index) {
+          // Logic for top 3 medals vs standard ranking
+          var label = (index + 1) + ". ";
+          if (index === 0) label = "🥇 Gold: ";
+          else if (index === 1) label = "🥈 Silver: ";
+          else if (index === 2) label = "🥉 Bronze: ";
+          
+          var div = document.createElement("div");
+          div.style.padding = "8px"; 
+          div.style.borderBottom = "1px solid #4A7055"; 
+          div.style.textAlign = "left";
+          div.innerHTML = "<strong>" + label + entry.name + "</strong> - " + entry.score + " pts";
+          list.appendChild(div);
+        });
+      }).getLeaderboard();
+    }
+  </script>
+</body>
+</html>
